@@ -26,31 +26,13 @@ Guidelines for high-quality output:
 
 Return ONLY the JSON array, no markdown fences, no explanation.`;
 
-const SYSTEM_PROMPT_REWRITE = `You are an expert copywriter and presentation specialist. Rewrite the given content to be:
-- More professional and polished
-- Concise and impactful
-- Using active voice
-- With stronger verbs and clearer structure
-Return only the improved text.`;
-
-const SYSTEM_PROMPT_IMPROVE = `You are a presentation design consultant. Analyze the given slide content and improve it by:
-- Making the title more compelling
-- Tightening bullet points
-- Adding missing context
-- Improving flow and narrative
-Return the improved slide as a JSON object with: title, subtitle, bullets (array), notes, layout.`;
+const SYSTEM_PROMPT_REWRITE = `You are an expert copywriter. Rewrite the given content to be more professional, concise, and impactful. Return only the improved text.`;
 
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { prompt, type = "generate" } = await req.json();
-
-  const systemPrompts: Record<string, string> = {
-    generate: SYSTEM_PROMPT_GENERATE,
-    rewrite: SYSTEM_PROMPT_REWRITE,
-    improve: SYSTEM_PROMPT_IMPROVE,
-  };
 
   try {
     const response = await fetch("https://api.cerebras.ai/v1/chat/completions", {
@@ -60,9 +42,9 @@ export async function POST(req: NextRequest) {
         "Authorization": "Bearer " + process.env.CEREBRAS_API_KEY,
       },
       body: JSON.stringify({
-        model: "llama-4-scout-17b-16e-instruct",
+        model: "qwen-3-235b-a22b-instruct-2507",
         messages: [
-          { role: "system", content: systemPrompts[type] || systemPrompts.generate },
+          { role: "system", content: type === "generate" ? SYSTEM_PROMPT_GENERATE : SYSTEM_PROMPT_REWRITE },
           { role: "user", content: prompt },
         ],
         max_tokens: 8192,
