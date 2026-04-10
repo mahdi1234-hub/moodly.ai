@@ -23,27 +23,27 @@ const bgStyles: Record<string, string> = {
 };
 
 function SlidePreview({ content }: { content: string }) {
-  let data: Record<string, unknown> = {};
+  let data: { title?: string; subtitle?: string; bullets?: string[]; emoji?: string; background?: string; [k: string]: unknown } = {};
   try { data = JSON.parse(content); } catch { data = {}; }
   const bg = bgStyles[(data.background as string) || "white"] || bgStyles.white;
   return (
     <div className={"aspect-[16/10] rounded-xl overflow-hidden p-4 flex flex-col justify-center " + bg}>
-      {data.emoji && <span className="text-lg mb-1">{data.emoji as string}</span>}
+      {data.emoji && <span className="text-lg mb-1">{String(data.emoji || "")}</span>}
       {data.title ? (
-        <p className="text-[11px] font-medium leading-tight tracking-tight line-clamp-2">{data.title as string}</p>
+        <p className="text-[11px] font-medium leading-tight tracking-tight line-clamp-2">{String(data.title || "")}</p>
       ) : (
         <p className="text-[11px] opacity-30 italic">Empty slide</p>
       )}
-      {data.subtitle && <p className="text-[9px] opacity-50 mt-0.5 truncate">{data.subtitle as string}</p>}
-      {Array.isArray(data.bullets) && (data.bullets as string[]).length > 0 && (
+      {data.subtitle && <p className="text-[9px] opacity-50 mt-0.5 truncate">{String(data.subtitle || "")}</p>}
+      {Array.isArray(data.bullets) && (data.bullets || []).length > 0 && (
         <div className="mt-1.5 space-y-0.5">
-          {(data.bullets as string[]).slice(0, 2).map((b, i) => (
+          {(data.bullets || []).slice(0, 2).map((b, i) => (
             <div key={i} className="flex items-start gap-1">
               <span className="w-1 h-1 rounded-full bg-current opacity-30 mt-1 shrink-0"/>
               <p className="text-[7px] opacity-50 truncate">{b}</p>
             </div>
           ))}
-          {(data.bullets as string[]).length > 2 && <p className="text-[6px] opacity-30">+{(data.bullets as string[]).length - 2} more</p>}
+          {(data.bullets || []).length > 2 && <p className="text-[6px] opacity-30">+{(data.bullets || []).length - 2} more</p>}
         </div>
       )}
     </div>
