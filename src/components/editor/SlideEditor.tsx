@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Plus, Trash2 } from "lucide-react";
 
+interface SlideData { title?: string; subtitle?: string; bullets?: string[]; emoji?: string; notes?: string; background?: string; quote?: string; author?: string; stats?: { value: string; label: string }[]; layout?: string; [key: string]: unknown; }
 interface Props { content: string; layout: string; onChange: (content: string) => void; }
 
 const bgStyles: Record<string, string> = {
@@ -16,13 +17,13 @@ const bgOptions = ["white", "light", "dark", "gradient", "accent"];
 const layoutOptions = ["title", "content", "two-column", "quote", "stats", "blank"];
 
 export function SlideEditor({ content, layout, onChange }: Props) {
-  const [parsed, setParsed] = useState<Record<string, unknown>>({});
+  const [parsed, setParsed] = useState<SlideData>({});
 
   useEffect(() => {
     try { setParsed(JSON.parse(content)); } catch { setParsed({ title: "", subtitle: "", bullets: [], background: "white" }); }
   }, [content]);
 
-  const update = (field: string, value: unknown) => {
+  const update = (field: string, value: string | string[]) => {
     const updated = { ...parsed, [field]: value };
     setParsed(updated);
     onChange(JSON.stringify(updated));
@@ -34,13 +35,13 @@ export function SlideEditor({ content, layout, onChange }: Props) {
   const bulletDotColor = isLight ? "bg-neutral-400" : "bg-white/40";
 
   const addBullet = () => {
-    const bullets = Array.isArray(parsed.bullets) ? [...(parsed.bullets as string[])] : [];
+    const bullets = Array.isArray(parsed.bullets) ? [...(parsed.bullets || [])] : [];
     bullets.push("");
     update("bullets", bullets);
   };
 
   const removeBullet = (index: number) => {
-    const bullets = [...(parsed.bullets as string[])];
+    const bullets = [...(parsed.bullets || [])];
     bullets.splice(index, 1);
     update("bullets", bullets);
   };
@@ -87,15 +88,15 @@ export function SlideEditor({ content, layout, onChange }: Props) {
         />
 
         {/* Bullets */}
-        {(Array.isArray(parsed.bullets) && (parsed.bullets as string[]).length > 0) && (
+        {(Array.isArray(parsed.bullets) && (parsed.bullets || []).length > 0) && (
           <ul className="space-y-2 mt-1">
-            {(parsed.bullets as string[]).map((bullet, i) => (
+            {(parsed.bullets || []).map((bullet, i) => (
               <li key={i} className="flex items-start gap-3 group">
                 <span className={"mt-2.5 w-1.5 h-1.5 rounded-full shrink-0 " + bulletDotColor} />
                 <input
                   value={bullet}
                   onChange={(e) => {
-                    const bullets = [...(parsed.bullets as string[])];
+                    const bullets = [...(parsed.bullets || [])];
                     bullets[i] = e.target.value;
                     update("bullets", bullets);
                   }}
@@ -118,7 +119,7 @@ export function SlideEditor({ content, layout, onChange }: Props) {
         {/* Notes */}
         {parsed.notes && (
           <div className={"mt-auto pt-4 border-t text-[12px] opacity-40 " + (isLight ? "border-neutral-200" : "border-white/10")}>
-            Notes: {parsed.notes as string}
+            Notes: {parsed.notes}
           </div>
         )}
       </div>
